@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <!-- Thêm CSS để thiết kế nút Bắt đầu -->
+  <style>
+    #ui-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #start-btn {
+      padding: 15px 30px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      background-color: #ff3b30;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Màn hình chờ yêu cầu tương tác -->
+  <div id="ui-container">
+    <button id="start-btn">CHẠM ĐỂ KHÁM PHÁ</button>
+  </div>
+
+  <a-scene 
+    mindar-image="imageTargetSrc: targets.mind;"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+  >
+
+    <a-assets>
+      <!-- ❌ ĐÃ BỎ THUỘC TÍNH 'muted' -->
+      <video id="video" crossorigin="anonymous" src="./video.mp4" loop playsinline webkit-playsinline></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+      <!-- Đã cập nhật width thành 1.02 và height thành 0.612 -->
+      <a-video 
+        src="#video" 
+        width="1.02" 
+        height="0.612"
+        position="0 0 0"
+      ></a-video>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const target = document.querySelector('#target');
+      const video = document.querySelector('#video');
+      const uiContainer = document.querySelector('#ui-container');
+      const startBtn = document.querySelector('#start-btn');
+
+      // 1. Xử lý khi người dùng bấm nút Bắt đầu
+      startBtn.addEventListener('click', function() {
+        // Mở khóa âm thanh bằng cách play và pause ngay lập tức
+        video.play();
+        video.pause(); 
+        
+        // Ẩn màn hình chờ đi để lộ camera quét AR
+        uiContainer.style.display = 'none';
+      });
+
+      // 2. Play video (lúc này đã có tiếng) khi quét trúng hình
+      target.addEventListener("targetFound", event => {
+        video.play();
+      });
+
+      // 3. Tạm dừng khi mất hình
+      target.addEventListener("targetLost", event => {
+        video.pause();
+      });
+    });
+  </script>
+
+</body>
+</html>
